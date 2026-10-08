@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,9 @@ import ru.khalikov.messenger.R
 fun SignupScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordConfirm by remember { mutableStateOf("") }
+
+    val authState = authViewModel.authState.observeAsState()
 
     Column(
         modifier = Modifier
@@ -79,8 +83,8 @@ fun SignupScreen(modifier: Modifier = Modifier, navController: NavController, au
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = passwordConfirm,
+            onValueChange = { passwordConfirm = it },
             label = { Text(stringResource(R.string.password_confirm_label)) },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
@@ -90,7 +94,7 @@ fun SignupScreen(modifier: Modifier = Modifier, navController: NavController, au
         Spacer(modifier = Modifier.height(32.dp))
 
         FilledTonalButton(
-            onClick = {  },
+            onClick = { authViewModel.signup(email, password, passwordConfirm) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
