@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "619312037667",
+    "project_id": "messenger-796bf",
+    "storage_bucket": "messenger-796bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:619312037667:android:2768d4021cf5b59f005696",
+        "android_client_info": {
+          "package_name": "ru.khalikov.messenger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUAW6edZIDb7BFRe4rFYS-Rpr3q_rZ8XI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
