@@ -65,7 +65,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = password,
@@ -91,7 +91,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(
             onClick = { navController.navigate("signup") }
