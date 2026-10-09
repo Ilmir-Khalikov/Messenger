@@ -5,6 +5,8 @@
     <string name="password_label">Пароль</string>
     <string name="password_confirm_label">Подтверждение пароля</string>
     <string name="create_account_button">Создать аккаунт</string>
+    <string name="sign_out_button">Выйти из аккаунта</string>
+
 
     <!-- Login screen -->
     <string name="login_title">Вход</string>

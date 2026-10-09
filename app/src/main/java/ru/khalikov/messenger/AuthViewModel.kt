@@ -1,8 +1,5 @@
 package ru.khalikov.messenger
 
-import android.R
-import android.os.Message
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
