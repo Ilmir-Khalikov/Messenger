@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MessengerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(modifier = Modifier.padding(innerPadding), authViewModel = authViewModel)
+                    AppNavigation(modifier = Modifier.fillMaxSize().padding(innerPadding), authViewModel = authViewModel)
                 }
             }
         }
