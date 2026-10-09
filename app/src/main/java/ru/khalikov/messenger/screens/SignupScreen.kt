@@ -32,7 +32,7 @@ import ru.khalikov.messenger.AuthViewModel
 import ru.khalikov.messenger.R
 
 @Composable
-fun SignupScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordConfirm by remember { mutableStateOf("") }
@@ -42,7 +42,7 @@ fun SignupScreen(modifier: Modifier = Modifier, navController: NavController, au
 
     LaunchedEffect(authState.value) {
         when(authState.value) {
-            is AuthState.Authenticated -> navController.navigate("home")
+            is AuthState.Authenticated -> navController.navigate("main")
             is AuthState.Error -> Toast.makeText(context,(authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
             else -> Unit
         }

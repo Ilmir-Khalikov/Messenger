@@ -5,8 +5,17 @@
     <string name="password_label">Пароль</string>
     <string name="password_confirm_label">Подтверждение пароля</string>
     <string name="create_account_button">Создать аккаунт</string>
-    <string name="sign_out_button">Выйти из аккаунта</string>
+    <string name="log_out_button">Выйти из аккаунта</string>
+    <string name="save">Сохранить</string>
 
+
+
+    <!-- Profile screen -->
+    <string name="profile_title">Профиль</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="chats_title">Чаты</string>
+    <string name="contacts_title">Контакты</string>
 
     <!-- Login screen -->
     <string name="login_title">Вход</string>
