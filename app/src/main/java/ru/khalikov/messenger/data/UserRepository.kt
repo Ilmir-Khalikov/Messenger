@@ -16,7 +16,13 @@ class UserRepository(
     suspend fun getProfile(uid: String): UserProfile? {
         val snapshot = users.document(uid).get().await()
         if (!snapshot.exists()) return null
-        return snapshot.toObject(UserProfile::class.java)?.copy(uid = uid)
+        return UserProfile(
+            uid = uid,
+            publicId = snapshot.getString("publicId").orEmpty(),
+            nickname = snapshot.getString("nickname").orEmpty(),
+            about = snapshot.getString("about").orEmpty(),
+            photoUrl = snapshot.getString("photoUrl").orEmpty()
+        )
     }
 
     suspend fun getOrCreateProfile(uid: String, email: String?): UserProfile {
@@ -27,7 +33,7 @@ class UserRepository(
 
         val publicId = allocatePublicId(uid, publicIdFromEmail(email))
         val profile = (existing ?: UserProfile(uid = uid)).copy(publicId = publicId)
-        users.document(uid).set(profile).await()
+        users.document(uid).set(profile.toMap()).await()
         return profile
     }
 
@@ -51,9 +57,17 @@ class UserRepository(
             about = about.trim(),
             photoUrl = photoUrl
         )
-        users.document(uid).set(updated).await()
+        users.document(uid).set(updated.toMap()).await()
         return updated
     }
+
+    private fun UserProfile.toMap(): Map<String, String> = mapOf(
+        "uid" to uid,
+        "publicId" to publicId,
+        "nickname" to nickname,
+        "about" to about,
+        "photoUrl" to photoUrl
+    )
 
     private suspend fun allocatePublicId(uid: String, preferred: String): String {
         val base = preferred.ifBlank { "id${uid.take(8).lowercase()}" }

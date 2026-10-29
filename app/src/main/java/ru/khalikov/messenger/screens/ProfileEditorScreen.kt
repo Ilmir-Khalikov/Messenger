@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import ru.khalikov.messenger.data.AvatarEncoder
 import ru.khalikov.messenger.AuthViewModel
 import ru.khalikov.messenger.ProfileSaveState
 import ru.khalikov.messenger.R
@@ -110,7 +113,8 @@ fun ProfileEditorScreen(
     }
 
     val isSaving = saveState is ProfileSaveState.Saving
-    val avatarModel = localPhotoUri ?: profile?.photoUrl?.takeIf { it.isNotBlank() }
+    val storedPhoto = profile?.photoUrl.orEmpty()
+    val storedBitmap = remember(storedPhoto) { AvatarEncoder.decodeToBitmap(storedPhoto) }
 
     Scaffold(
         topBar = {
@@ -162,15 +166,26 @@ fun ProfileEditorScreen(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (avatarModel != null) {
-                    AsyncImage(
-                        model = avatarModel,
+                when {
+                    localPhotoUri != null -> AsyncImage(
+                        model = localPhotoUri,
                         contentDescription = stringResource(R.string.change_avatar),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                } else {
-                    Icon(
+                    storedBitmap != null -> Image(
+                        bitmap = storedBitmap.asImageBitmap(),
+                        contentDescription = stringResource(R.string.change_avatar),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    storedPhoto.startsWith("http") -> AsyncImage(
+                        model = storedPhoto,
+                        contentDescription = stringResource(R.string.change_avatar),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    else -> Icon(
                         painter = painterResource(R.drawable.ic_person),
                         contentDescription = stringResource(R.string.change_avatar),
                         modifier = Modifier.size(64.dp),
