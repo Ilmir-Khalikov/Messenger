@@ -1,5 +1,6 @@
 package ru.khalikov.messenger
 
+import android.content.ContentResolver
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import ru.khalikov.messenger.data.FirestoreErrors
 import ru.khalikov.messenger.data.UserProfile
 import ru.khalikov.messenger.data.UserRepository
 import ru.khalikov.messenger.data.isComplete
@@ -39,13 +41,7 @@ class AuthViewModel : ViewModel() {
 
         _authState.value = AuthState.Loading
         viewModelScope.launch {
-            try {
-                val profile = userRepository.getOrCreateProfile(user.uid, user.email)
-                _profile.value = profile
-                _authState.value = AuthState.Authenticated(profile.isComplete)
-            } catch (_: Exception) {
-                _authState.value = AuthState.Authenticated(_profile.value?.isComplete == true)
-            }
+            loadProfileAfterAuth(requireCompleteProfile = true)
         }
     }
 
@@ -59,13 +55,11 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 auth.signInWithEmailAndPassword(email, password).await()
-                val user = auth.currentUser ?: throw IllegalStateException("User is missing")
-                val profile = userRepository.getOrCreateProfile(user.uid, user.email)
-                _profile.value = profile
-                _authState.value = AuthState.Authenticated(profile.isComplete)
             } catch (error: Exception) {
                 _authState.value = AuthState.Error(error.message ?: "Something went wrong")
+                return@launch
             }
+            loadProfileAfterAuth(requireCompleteProfile = true)
         }
     }
 
@@ -84,13 +78,11 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 auth.createUserWithEmailAndPassword(email, password).await()
-                val user = auth.currentUser ?: throw IllegalStateException("User is missing")
-                val profile = userRepository.getOrCreateProfile(user.uid, user.email)
-                _profile.value = profile
-                _authState.value = AuthState.Authenticated(profileComplete = false)
             } catch (error: Exception) {
                 _authState.value = AuthState.Error(error.message ?: "Something went wrong")
+                return@launch
             }
+            loadProfileAfterAuth(requireCompleteProfile = false)
         }
     }
 
@@ -100,14 +92,17 @@ class AuthViewModel : ViewModel() {
             try {
                 _profile.value = userRepository.getOrCreateProfile(user.uid, user.email)
             } catch (error: Exception) {
-                _profileSaveState.value = ProfileSaveState.Error(
-                    error.message ?: "Something went wrong"
-                )
+                _profileSaveState.value = ProfileSaveState.Error(FirestoreErrors.messageOf(error))
             }
         }
     }
 
-    fun saveProfile(nickname: String, about: String, photoUri: Uri?) {
+    fun saveProfile(
+        nickname: String,
+        about: String,
+        photoUri: Uri?,
+        contentResolver: ContentResolver
+    ) {
         val user = auth.currentUser
         if (user == null) {
             _profileSaveState.value = ProfileSaveState.Error("User is missing")
@@ -121,14 +116,18 @@ class AuthViewModel : ViewModel() {
         _profileSaveState.value = ProfileSaveState.Saving
         viewModelScope.launch {
             try {
-                val updated = userRepository.saveProfile(user.uid, nickname, about, photoUri)
+                val updated = userRepository.saveProfile(
+                    uid = user.uid,
+                    nickname = nickname,
+                    about = about,
+                    photoUri = photoUri,
+                    contentResolver = contentResolver
+                )
                 _profile.value = updated
                 _authState.value = AuthState.Authenticated(profileComplete = true)
                 _profileSaveState.value = ProfileSaveState.Saved
             } catch (error: Exception) {
-                _profileSaveState.value = ProfileSaveState.Error(
-                    error.message ?: "Something went wrong"
-                )
+                _profileSaveState.value = ProfileSaveState.Error(FirestoreErrors.messageOf(error))
             }
         }
     }
@@ -142,6 +141,24 @@ class AuthViewModel : ViewModel() {
         _profile.value = null
         _profileSaveState.value = ProfileSaveState.Idle
         _authState.value = AuthState.Unauthenticated
+    }
+
+    private suspend fun loadProfileAfterAuth(requireCompleteProfile: Boolean) {
+        val user = auth.currentUser
+        if (user == null) {
+            _authState.value = AuthState.Unauthenticated
+            return
+        }
+
+        try {
+            val profile = userRepository.getOrCreateProfile(user.uid, user.email)
+            _profile.value = profile
+            _authState.value = AuthState.Authenticated(
+                profileComplete = requireCompleteProfile && profile.isComplete
+            )
+        } catch (error: Exception) {
+            _authState.value = AuthState.Error(FirestoreErrors.messageOf(error))
+        }
     }
 }
 

@@ -48,7 +48,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                     launchSingleTop = true
                 }
             }
-            is AuthState.Error -> Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            is AuthState.Error -> Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
             else -> Unit
         }
     }

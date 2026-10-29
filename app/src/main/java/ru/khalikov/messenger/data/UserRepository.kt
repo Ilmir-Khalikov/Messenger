@@ -1,13 +1,14 @@
 package ru.khalikov.messenger.data
 
+import android.content.ContentResolver
 import android.net.Uri
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class UserRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
     private val users = firestore.collection(USERS_COLLECTION)
     private val publicIds = firestore.collection(PUBLIC_IDS_COLLECTION)
@@ -34,11 +35,14 @@ class UserRepository(
         uid: String,
         nickname: String,
         about: String,
-        photoUri: Uri?
+        photoUri: Uri?,
+        contentResolver: ContentResolver
     ): UserProfile {
         val current = getProfile(uid) ?: getOrCreateProfile(uid, null)
         val photoUrl = if (photoUri != null) {
-            uploadAvatar(uid, photoUri)
+            withContext(Dispatchers.IO) {
+                AvatarEncoder.encode(contentResolver, photoUri)
+            }
         } else {
             current.photoUrl
         }
@@ -49,12 +53,6 @@ class UserRepository(
         )
         users.document(uid).set(updated).await()
         return updated
-    }
-
-    private suspend fun uploadAvatar(uid: String, photoUri: Uri): String {
-        val ref = storage.reference.child("$AVATARS_FOLDER/$uid.jpg")
-        ref.putFile(photoUri).await()
-        return ref.downloadUrl.await().toString()
     }
 
     private suspend fun allocatePublicId(uid: String, preferred: String): String {
@@ -90,6 +88,5 @@ class UserRepository(
     private companion object {
         const val USERS_COLLECTION = "users"
         const val PUBLIC_IDS_COLLECTION = "publicIds"
-        const val AVATARS_FOLDER = "avatars"
     }
 }

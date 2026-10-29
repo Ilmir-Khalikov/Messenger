@@ -102,7 +102,7 @@ fun ProfileEditorScreen(
                 }
             }
             is ProfileSaveState.Error -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
                 authViewModel.consumeProfileSaveState()
             }
             else -> Unit
@@ -236,7 +236,12 @@ fun ProfileEditorScreen(
 
             FilledTonalButton(
                 onClick = {
-                    authViewModel.saveProfile(nickname, about, localPhotoUri)
+                    authViewModel.saveProfile(
+                        nickname = nickname,
+                        about = about,
+                        photoUri = localPhotoUri,
+                        contentResolver = context.contentResolver
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
