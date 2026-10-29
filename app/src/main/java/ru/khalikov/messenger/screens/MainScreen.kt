@@ -1,9 +1,14 @@
 package ru.khalikov.messenger.screens
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +31,16 @@ fun MainScreen(
     navController: androidx.navigation.NavController,
     authViewModel: AuthViewModel
 ) {
+    val authState = authViewModel.authState.observeAsState()
     val bottomNavController = rememberNavController()
+
+    LaunchedEffect(authState.value) {
+        if (authState.value is AuthState.Unauthenticated) {
+            navController.navigate("login") {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
+    }
     val items = listOf(
         BottomNavItem("chats", stringResource(R.string.chats_title), R.drawable.ic_chat),
         BottomNavItem("contacts", stringResource(R.string.contacts_title), R.drawable.ic_contacts),

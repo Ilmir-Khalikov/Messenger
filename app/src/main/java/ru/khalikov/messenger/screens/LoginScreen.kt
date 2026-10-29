@@ -40,9 +40,15 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
 
     LaunchedEffect(authState.value) {
-        when(authState.value) {
-            is AuthState.Authenticated -> navController.navigate("main")
-            is AuthState.Error -> Toast.makeText(context,(authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+        when (val state = authState.value) {
+            is AuthState.Authenticated -> {
+                val destination = if (state.profileComplete) "main" else "profile/setup"
+                navController.navigate(destination) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+            is AuthState.Error -> Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
             else -> Unit
         }
     }
@@ -99,6 +105,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
+            enabled = authState.value !is AuthState.Loading,
             shape = MaterialTheme.shapes.extraLarge
         ) {
             Text(

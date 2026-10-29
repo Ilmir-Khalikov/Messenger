@@ -12,6 +12,15 @@
 
     <!-- Profile screen -->
     <string name="profile_title">Профиль</string>
+    <string name="public_id_label">ID</string>
+    <string name="nickname_label">Никнейм</string>
+    <string name="about_label">О себе</string>
+    <string name="edit_profile">Редактировать профиль</string>
+    <string name="change_avatar">Изменить фото</string>
+    <string name="back">Назад</string>
+    <string name="nickname_required">Введите никнейм</string>
+    <string name="profile_saved">Профиль сохранён</string>
+    <string name="public_id_format">\@%1$s</string>
 
     <string name="settings_title">Настройки</string>
     <string name="chats_title">Чаты</string>
